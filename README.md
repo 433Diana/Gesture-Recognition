@@ -48,7 +48,7 @@ python gesture.py
 
 Copy model file (*.hdf5) to ./Matlab
 
-In Matlan command line window:
+In Matlab command line window:
 
 Extract weights parameter from hdf5 model,
 ```Shell
