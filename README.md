@@ -27,8 +27,6 @@ Create Anaconda environment using **gesture3.yaml**
 Open Anaconda Prompt,
 ```Shell
 conda env create -f gesture3.yaml
-```
-```Shell
 activate gesture3
 ```
 
