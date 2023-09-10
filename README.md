@@ -5,19 +5,30 @@
 
 # Project structure
 **Matlab**: Matlab project of gesture recognition inference model. Including model quantization and accuracy analysis.
-figure: Gesture recognition dataset used in this project.
-variable_*: Weights of model with different length of words.
-CNN_*.m: Matlab function to implement several layers in CNN model.
-compare.m: Comparison of accuracy before and after model quantization.
-extract.m: Extract parameters from hdf5 file.
-infer.m: Guess gesture from 1 input image.
-quan_model.hdf5: CNN model.
+
+    figure: Gesture recognition dataset used in this project.
+
+    variable_*: Weights of model with different length of words.
+
+    CNN_*.m: Matlab function to implement several layers in CNN model.
+
+    compare.m: Comparison of accuracy before and after model quantization.
+
+    extract.m: Extract parameters from hdf5 file.
+
+    infer.m: Guess gesture from 1 input image.
+
+    quan_model.hdf5: CNN model.
 
 **Python**: Python project of training CNN model.
-imgfolder: Gesture recognition dataset used in this project. 
-model: Weights of CNN model after training (saved as hdf5 file).
-gesture.py: Python code of training CNN model.
-gesture3.yaml: Backup of Anaconda environment.
+
+    imgfolder: Gesture recognition dataset used in this project. 
+
+    model: Weights of CNN model after training (saved as hdf5 file).
+
+    gesture.py: Python code of training CNN model.
+
+    gesture3.yaml: Backup of Anaconda environment.
 
 # Get Started
 **Reminder:** Remember to edit parameters before running a project!!!
