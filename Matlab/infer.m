@@ -5,6 +5,8 @@ time = cputime;
 figdir = 'figure\';
 figname = 'pppunch265.png';
 bits = '8bit';
+word = 8;
+fraction = 4;
 gesture = ["OK","NOTHING","PEACE","PUNCH","STOP"];
 
 if (strcmp(bits,'32bit') == 0) && ... 
@@ -20,7 +22,7 @@ if (strcmp(bits,'int8') == 1)
 elseif (strcmp(bits,'32bit') == 1)
     img = img/255;
 else
-    img = single(fi(img/255,1,8,5));
+    img = single(fi(img/255,1,word,fraction));
 end
 
 %***************************-----CNN-----****************************%
@@ -44,7 +46,7 @@ if (strcmp(bits,'int8') == 1)
 elseif (strcmp(bits,'32bit') == 1)
     conv1_out = single(CNN_Conv(img,conv1_kernel,conv1_bias,1,1));
 else
-    conv1_out = single(fi(CNN_Conv(img,conv1_kernel,conv1_bias,1,1),1,8,5));
+    conv1_out = single(fi(CNN_Conv(img,conv1_kernel,conv1_bias,1,1),1,word,fraction));
 end
 %--------------------------------relu--------------------------------%
 relu1_out = CNN_Relu(conv1_out);
@@ -71,7 +73,7 @@ if (strcmp(bits,'int8') == 1)
 elseif (strcmp(bits,'32bit') == 1)
     conv2_out = single(CNN_Conv(maxpool1_out,conv2_kernel,conv2_bias,1,1));
 else
-    conv2_out = single(fi(CNN_Conv(maxpool1_out,conv2_kernel,conv2_bias,1,1),1,8,5));
+    conv2_out = single(fi(CNN_Conv(maxpool1_out,conv2_kernel,conv2_bias,1,1),1,word,fraction));
 end
 %--------------------------------relu--------------------------------%
 relu2_out = CNN_Relu(conv2_out);
@@ -118,7 +120,7 @@ if (strcmp(bits,'int8') == 1)
 elseif (strcmp(bits,'32bit') == 1)
     cls_dense1_out = single(dense1_kernel * flatten_out + dense1_bias);
 else
-    cls_dense1_out = single(fi(dense1_kernel * flatten_out + dense1_bias,1,8,5));
+    cls_dense1_out = single(fi(dense1_kernel * flatten_out + dense1_bias,1,word,fraction));
 end
 
 % cls_relu_out = CNN_Relu(cls_dense1_out);
