@@ -1,7 +1,7 @@
 # Gesture Recognition
  An implementation of gesture recognition algorithm based on RISC-V SoC
 
-**\[Sept 10, 2023\] Updates: Add comparison of accuracy between original CNN model and quantilization model.**
+**\[Sept 10, 2023\] Updates: Add comparison of accuracy between original CNN model and quantization model.**
 
 # Project structure
 **Matlab**: Matlab project of gesture recognition inference model. Including model quantization and accuracy analysis.
