@@ -9,6 +9,7 @@ from sklearn.utils import shuffle
 from sklearn.model_selection import train_test_split
 from tensorflow.python.keras.utils.np_utils import to_categorical
 import numpy as np
+from matplotlib import pyplot as plt
 
 path = './imgfolder'
 nb_classes 		= 5
@@ -16,7 +17,7 @@ img_channels 	= 1
 img_rows 		= 40
 img_cols 		= 40
 nbsize 			= 32
-nepoch			= 20
+nepoch			= 50
 
 def modlistdir(path, pattern = None):
     listing = os.listdir(path)
@@ -96,6 +97,46 @@ def initializers():
     Y_test = to_categorical(y_test, nb_classes)
     return X_train, X_test, Y_train, Y_test
 
+def visualizeHis(hist):
+    # visualizing losses and accuracy
+    keylist = hist.history.keys()
+    #print(hist.history.keys())
+    train_loss=hist.history['loss']
+    val_loss=hist.history['val_loss']
+    
+    #Tensorflow new updates seem to have different key name
+    if 'acc' in keylist:
+        train_acc=hist.history['acc']
+        val_acc=hist.history['val_acc']
+    else:
+        train_acc=hist.history['accuracy']
+        val_acc=hist.history['val_accuracy']
+    xc=range(nepoch)
+
+    plt.figure(1,figsize=(7,5))
+    plt.plot(xc,train_loss)
+    plt.plot(xc,val_loss)
+    plt.xlabel('num of Epochs')
+    plt.ylabel('loss')
+    plt.title('train_loss vs val_loss')
+    plt.grid(True)
+    plt.legend(['train','val'])
+    plt.savefig('epoch/loss.png')
+    #print plt.style.available # use bmh, classic,ggplot for big pictures
+    #plt.style.use(['classic'])
+
+    plt.figure(2,figsize=(7,5))
+    plt.plot(xc,train_acc)
+    plt.plot(xc,val_acc)
+    plt.xlabel('num of Epochs')
+    plt.ylabel('accuracy')
+    plt.title('train_acc vs val_acc')
+    plt.grid(True)
+    plt.legend(['train','val'],loc=4)
+    plt.savefig('epoch/accuracy.png')
+
+    plt.show()
+
 # Load MNIST dataset
 X_train, X_test, Y_train, Y_test = initializers()
 
@@ -117,114 +158,116 @@ model.compile(optimizer='adam',
 
 model.summary()
 
-model.fit(
+hist = model.fit(
     X_train,
     Y_train,
     batch_size=nbsize,
     epochs=nepoch,
     verbose=1,
-    validation_split=0.1,
+    validation_split=0.2,
 )
 
-import tensorflow_model_optimization as tfmot
+visualizeHis(hist)
 
-quantize_model = tfmot.quantization.keras.quantize_model
+# import tensorflow_model_optimization as tfmot
 
-# q_aware stands for for quantization aware.
-q_aware_model = quantize_model(model)
+# quantize_model = tfmot.quantization.keras.quantize_model
 
-# `quantize_model` requires a recompile.
-q_aware_model.compile(optimizer='adam',
-              loss=tf.keras.losses.categorical_crossentropy,
-              metrics=['accuracy'])
+# # q_aware stands for for quantization aware.
+# q_aware_model = quantize_model(model)
 
-q_aware_model.summary()
+# # `quantize_model` requires a recompile.
+# q_aware_model.compile(optimizer='adam',
+#               loss=tf.keras.losses.categorical_crossentropy,
+#               metrics=['accuracy'])
 
-q_aware_model.fit(X_train, 
-                  Y_train,
-                  batch_size=nbsize, 
-              	  epochs=nepoch, 
-            	  verbose=1, 
-                  validation_split=0.1)
+# q_aware_model.summary()
 
-_, baseline_model_accuracy = model.evaluate(
-    X_test, Y_test, verbose=0)
+# q_aware_model.fit(X_train, 
+#                   Y_train,
+#                   batch_size=nbsize, 
+#               	  epochs=nepoch, 
+#             	  verbose=1, 
+#                   validation_split=0.2)
 
-_, q_aware_model_accuracy = q_aware_model.evaluate(
-   X_test, Y_test, verbose=0)
+# _, baseline_model_accuracy = model.evaluate(
+#     X_test, Y_test, verbose=0)
 
-print('Baseline test accuracy:', baseline_model_accuracy)
-print('Quant test accuracy:', q_aware_model_accuracy)
+# _, q_aware_model_accuracy = q_aware_model.evaluate(
+#    X_test, Y_test, verbose=0)
 
-converter = tf.lite.TFLiteConverter.from_keras_model(q_aware_model)
-converter.optimizations = [tf.lite.Optimize.DEFAULT]
+# print('Baseline test accuracy:', baseline_model_accuracy)
+# print('Quant test accuracy:', q_aware_model_accuracy)
 
-quantized_tflite_model = converter.convert()
+# converter = tf.lite.TFLiteConverter.from_keras_model(q_aware_model)
+# converter.optimizations = [tf.lite.Optimize.DEFAULT]
 
-import numpy as np
+# quantized_tflite_model = converter.convert()
 
-def evaluate_model(interpreter):
-	input_index = interpreter.get_input_details()[0]["index"]
-	output_index = interpreter.get_output_details()[0]["index"]
+# import numpy as np
 
-	# Run predictions on every image in the "test" dataset.
-	prediction_digits = []
-	for i, test_image in enumerate(X_test):
-		if i % 100 == 0:
-			print('Evaluated on {n} results so far.'.format(n=i))
-		# Pre-processing: add batch dimension and convert to float32 to match with
-		# the model's input data format.
-		test_image = np.expand_dims(test_image, axis=0).astype(np.float32)
-		interpreter.set_tensor(input_index, test_image)
-		# Run inference.
-		interpreter.invoke()
+# def evaluate_model(interpreter):
+# 	input_index = interpreter.get_input_details()[0]["index"]
+# 	output_index = interpreter.get_output_details()[0]["index"]
 
-		# Post-processing: remove batch dimension and find the digit with highest
-		# probability.
-		output = interpreter.tensor(output_index)
-		digit = np.argmax(output()[0])
-		prediction_digits.append(digit)
+# 	# Run predictions on every image in the "test" dataset.
+# 	prediction_digits = []
+# 	for i, test_image in enumerate(X_test):
+# 		if i % 100 == 0:
+# 			print('Evaluated on {n} results so far.'.format(n=i))
+# 		# Pre-processing: add batch dimension and convert to float32 to match with
+# 		# the model's input data format.
+# 		test_image = np.expand_dims(test_image, axis=0).astype(np.float32)
+# 		interpreter.set_tensor(input_index, test_image)
+# 		# Run inference.
+# 		interpreter.invoke()
 
-	print('\n')
-	# Compare prediction results with ground truth labels to calculate accuracy.
-	prediction_digits = np.array(prediction_digits)
-	Y_lable = np.array(Y_test).T
-	Y_lable = tf.argmax(Y_lable)
-	Y_lable = np.array(Y_lable)
+# 		# Post-processing: remove batch dimension and find the digit with highest
+# 		# probability.
+# 		output = interpreter.tensor(output_index)
+# 		digit = np.argmax(output()[0])
+# 		prediction_digits.append(digit)
 
-	accuracy = (prediction_digits == Y_lable).mean()
-	return accuracy
+# 	print('\n')
+# 	# Compare prediction results with ground truth labels to calculate accuracy.
+# 	prediction_digits = np.array(prediction_digits)
+# 	Y_lable = np.array(Y_test).T
+# 	Y_lable = tf.argmax(Y_lable)
+# 	Y_lable = np.array(Y_lable)
 
-interpreter = tf.lite.Interpreter(model_content=quantized_tflite_model)
-interpreter.allocate_tensors()
+# 	accuracy = (prediction_digits == Y_lable).mean()
+# 	return accuracy
 
-test_accuracy = evaluate_model(interpreter)
+# interpreter = tf.lite.Interpreter(model_content=quantized_tflite_model)
+# interpreter.allocate_tensors()
 
-print('Quant TFLite test_accuracy:', test_accuracy)
-print('Quant TF test accuracy:', q_aware_model_accuracy)
+# test_accuracy = evaluate_model(interpreter)
 
-# Create float TFLite model.
-float_converter = tf.lite.TFLiteConverter.from_keras_model(model)
-float_tflite_model = float_converter.convert()
+# print('Quant TFLite test_accuracy:', test_accuracy)
+# print('Quant TF test accuracy:', q_aware_model_accuracy)
 
-# Measure sizes of models.
-_, float_file = tempfile.mkstemp('.tflite')
-_, quant_file = tempfile.mkstemp('.tflite')
+# # Create float TFLite model.
+# float_converter = tf.lite.TFLiteConverter.from_keras_model(model)
+# float_tflite_model = float_converter.convert()
 
-with open(quant_file, 'wb') as f:
-  f.write(quantized_tflite_model)
+# # Measure sizes of models.
+# _, float_file = tempfile.mkstemp('.tflite')
+# _, quant_file = tempfile.mkstemp('.tflite')
 
-with open(float_file, 'wb') as f:
-  f.write(float_tflite_model)
+# with open(quant_file, 'wb') as f:
+#   f.write(quantized_tflite_model)
 
-print("Float model in Mb:", os.path.getsize(float_file) / float(2**20))
-print("Quantized model in Mb:", os.path.getsize(quant_file) / float(2**20))
+# with open(float_file, 'wb') as f:
+#   f.write(float_tflite_model)
 
-with open('model_quan.tflite', 'wb') as f:
-  f.write(quantized_tflite_model)
+# print("Float model in Mb:", os.path.getsize(float_file) / float(2**20))
+# print("Quantized model in Mb:", os.path.getsize(quant_file) / float(2**20))
 
-with open('model_float.tflite', 'wb') as f:
-  f.write(float_tflite_model)
+# with open('model_quan.tflite', 'wb') as f:
+#   f.write(quantized_tflite_model)
+
+# with open('model_float.tflite', 'wb') as f:
+#   f.write(float_tflite_model)
 
 model.save_weights('./model/ori_model.hdf5',overwrite=True)
-q_aware_model.save_weights('./model/quan_model.hdf5',overwrite=True)
+# q_aware_model.save_weights('./model/quan_model.hdf5',overwrite=True)

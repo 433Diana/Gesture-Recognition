@@ -5,7 +5,7 @@ time = cputime;
 figdir = 'figure\';
 gesture = ["OK","NOTHING","PEACE","PUNCH","STOP"];
 word = 8;
-fraction = 4;
+fraction = 3;
 
 img_path_list = dir(strcat(figdir,'*.png'));
 img_num = length(img_path_list);
@@ -220,8 +220,9 @@ end
 acc_32bit = length(find(output_32bit==output_gd))/img_num;
 acc_8bit = length(find(output_8bit==output_gd))/img_num;
 
-fprintf('Accuracy of original model is %f\n',acc_32bit);
-fprintf('Accuracy of quantization model is %f\n',acc_8bit);
+fprintf('Accuracy of original model is %f.\n',acc_32bit);
+fprintf('Accuracy of quantization model is %f.\n',acc_8bit);
+fprintf('Accuracy is reduced by %f after quantization.\n',(acc_32bit-acc_8bit));
 
 time = cputime - time;
 fprintf('Runtime is %.2f seconds.\n',time);

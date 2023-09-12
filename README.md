@@ -1,6 +1,8 @@
 # Gesture Recognition
  An implementation of gesture recognition algorithm based on RISC-V SoC
 
+**\[Sept 12, 2023\] Updates: Plot the figures of accuracy and loss versus epoches in Python project.**
+
 **\[Sept 10, 2023\] Updates: Add comparison of accuracy between original CNN model and quantization model.**
 
 # Project structure
@@ -18,10 +20,12 @@
 
     infer.m: Guess gesture from 1 input image.
 
-    quan_model.hdf5: CNN model.
+    ori_model.hdf5: CNN model.
 
 **Python**: Python project of training CNN model.
 
+    epoch: Output figures of accuracy and loss versus epoches.
+    
     imgfolder: Gesture recognition dataset used in this project. 
 
     model: Weights of CNN model after training (saved as hdf5 file).
